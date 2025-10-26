@@ -69,7 +69,7 @@ export default function BriefingPage() {
                             {briefings.map((b) => (
                                 <li
                                     key={b.id}
-                                    className="p-4 rounded border border-var-border)]hover:bg-var-muted transition-all"
+                                    className="p-4 rounded border border-var-border hover:bg-var-muted transition-all"
                                 >
                                     <h3 className="font-medium text-lg">{b.filename}</h3>
                                     <p className="text-sm opacity-70 mb-2">
