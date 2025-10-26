@@ -1,14 +1,12 @@
 'use client'
-
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Html, Text3D, Center } from '@react-three/drei'
 import * as THREE from 'three'
 
-function FloatingNotebook() {
+function FloatingNotebook({ keywords = [] }: { keywords?: string[] }) {
     const notebookRef = React.useRef<THREE.Group>(null)
 
-    // Gentle floating and subtle wobble
     useFrame((state) => {
         const t = state.clock.getElapsedTime()
         if (notebookRef.current) {
@@ -26,7 +24,7 @@ function FloatingNotebook() {
                 <meshStandardMaterial color="#ffffff" roughness={0.7} metalness={0.2} />
             </mesh>
 
-            {/* Spiral Binds (ash-gray) */}
+            {/* Spiral Binds */}
             {[-1.2, -0.4, 0.4, 1.2].map((z, i) => (
                 <mesh key={i} position={[-1.1, 0, z]} rotation={[Math.PI / 2, 0, 0]}>
                     <torusGeometry args={[0.12, 0.04, 12, 24]} />
@@ -34,10 +32,10 @@ function FloatingNotebook() {
                 </mesh>
             ))}
 
-            {/* Metallic Gothic Text */}
+            {/* Title */}
             <Center position={[0, 0.15, 1.55]}>
                 <Text3D
-                    font="/fonts/MetalGothic_Regular.json" // make sure this font file is placed in /public/fonts
+                    font="/fonts/MetalGothic_Regular.json"
                     size={0.25}
                     height={0.05}
                     bevelEnabled
@@ -48,21 +46,57 @@ function FloatingNotebook() {
                     <meshStandardMaterial color="#b0b0b0" metalness={1} roughness={0.2} />
                 </Text3D>
             </Center>
+
+            {/* Floating keywords around notebook */}
+            {keywords.slice(0, 6).map((word, i) => (
+                <Text3D
+                    key={i}
+                    font="/fonts/MetalGothic_Regular.json"
+                    size={0.15}
+                    height={0.03}
+                    position={[
+                        Math.sin(i * 1.2) * 2.5,
+                        Math.cos(i * 1.5) * 0.8,
+                        Math.sin(i) * 1.5,
+                    ]}
+                    rotation={[0, i * 0.5, 0]}
+                >
+                    {word}
+                    <meshStandardMaterial color="#8a7cfb" metalness={0.9} roughness={0.2} />
+                </Text3D>
+            ))}
         </group>
     )
 }
 
 export default function ThreeScene() {
+    const [keywords, setKeywords] = useState<string[]>([])
+
+    useEffect(() => {
+        async function fetchLatest() {
+            try {
+                const res = await fetch('/api/briefing', { cache: 'no-store' })
+                const data = await res.json()
+                if (Array.isArray(data) && data.length > 0) {
+                    const latest = data[data.length - 1]
+                    const words = (latest.summary.match(/\b[A-Z][a-z]{3,}\b/g) || []).slice(0, 8)
+                    setKeywords(words)
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        fetchLatest()
+    }, [])
+
     return (
         <div className="w-full h-full">
             <Canvas camera={{ position: [0, 0, 6], fov: 45 }} shadows>
                 <ambientLight intensity={0.7} />
                 <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
                 <Suspense fallback={<Html>Loading Scene...</Html>}>
-                    <FloatingNotebook />
+                    <FloatingNotebook keywords={keywords} />
                 </Suspense>
-
-                {/* ✅ Rotate freely but no zoom */}
                 <OrbitControls enableZoom={false} enableRotate={true} />
             </Canvas>
         </div>
