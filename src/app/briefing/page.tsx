@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 interface Briefing {
     id: number
@@ -30,21 +31,42 @@ export default function BriefingPage() {
     }, [])
 
     async function handleDelete(id: number) {
-        if (!confirm('Are you sure you want to delete this briefing?')) return
-
-        try {
-            const res = await fetch(`/api/briefing?id=${id}`, {
-                method: 'DELETE',
-            })
-
-            if (res.ok) {
-                setBriefings((prev) => prev.filter((b) => b.id !== id))
-            } else {
-                alert('❌ Failed to delete briefing.')
-            }
-        } catch (err) {
-            console.error('Error deleting briefing:', err)
-        }
+        toast(
+            (t) => (
+                <div className="flex flex-col gap-3">
+                    <p>🗑️ Are you sure you want to delete this briefing?</p>
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            className="px-3 py-1 rounded-md text-sm bg-red-500 text-white hover:bg-red-600"
+                            onClick={async () => {
+                                toast.dismiss(t.id)
+                                try {
+                                    const res = await fetch(`/api/briefing?id=${id}`, { method: 'DELETE' })
+                                    if (res.ok) {
+                                        setBriefings((prev) => prev.filter((b) => b.id !== id))
+                                        toast.success('Briefing deleted ✅')
+                                    } else {
+                                        toast.error('Failed to delete briefing ❌')
+                                    }
+                                } catch (err) {
+                                    console.error(err)
+                                    toast.error('Error deleting briefing ❌')
+                                }
+                            }}
+                        >
+                            Yes, delete
+                        </button>
+                        <button
+                            className="px-3 py-1 rounded-md text-sm border border-border hover:bg-muted"
+                            onClick={() => toast.dismiss(t.id)}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            ),
+            { duration: 8000 }
+        )
     }
 
     return (
