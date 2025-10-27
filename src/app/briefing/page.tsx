@@ -13,20 +13,39 @@ export default function BriefingPage() {
     const [briefings, setBriefings] = useState<Briefing[]>([])
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        async function fetchBriefings() {
-            try {
-                const res = await fetch('/api/briefing', { cache: 'no-store' })
-                const data = await res.json()
-                setBriefings(data)
-            } catch (e) {
-                console.error(e)
-            } finally {
-                setLoading(false)
-            }
+    async function fetchBriefings() {
+        try {
+            const res = await fetch('/api/briefing', { cache: 'no-store' })
+            const data = await res.json()
+            setBriefings(data)
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    useEffect(() => {
         fetchBriefings()
     }, [])
+
+    async function handleDelete(id: number) {
+        if (!confirm('Are you sure you want to delete this briefing?')) return
+
+        try {
+            const res = await fetch(`/api/briefing?id=${id}`, {
+                method: 'DELETE',
+            })
+
+            if (res.ok) {
+                setBriefings((prev) => prev.filter((b) => b.id !== id))
+            } else {
+                alert('❌ Failed to delete briefing.')
+            }
+        } catch (err) {
+            console.error('Error deleting briefing:', err)
+        }
+    }
 
     return (
         <main className="min-h-screen bg-background text-foreground flex flex-col">
@@ -71,10 +90,20 @@ export default function BriefingPage() {
                                     key={b.id}
                                     className="p-4 rounded border border-var-border hover:bg-var-muted transition-all"
                                 >
-                                    <h3 className="font-medium text-lg">{b.filename}</h3>
-                                    <p className="text-sm opacity-70 mb-2">
-                                        {new Date(b.date).toLocaleString()}
-                                    </p>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <div>
+                                            <h3 className="font-medium text-lg">{b.filename}</h3>
+                                            <p className="text-sm opacity-70">
+                                                {new Date(b.date).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDelete(b.id)}
+                                            className="text-red-500 text-sm border border-red-500 px-3 py-1 rounded-md hover:bg-red-500 hover:text-white transition-all"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                     <pre className="whitespace-pre-wrap text-sm">{b.summary}</pre>
                                 </li>
                             ))}

@@ -169,3 +169,31 @@ export async function GET() {
         )
     }
 }
+
+
+// 🧩DELETE
+
+export async function DELETE(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url)
+        const id = Number(searchParams.get('id'))
+
+        if (!id) {
+            return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
+        }
+
+        const briefingsPath = path.join(process.cwd(), 'data', 'briefings.json')
+        if (!fs.existsSync(briefingsPath)) {
+            return NextResponse.json({ error: 'No briefings file found' }, { status: 404 })
+        }
+
+        const data = JSON.parse(fs.readFileSync(briefingsPath, 'utf-8'))
+        const updated = data.filter((b: any) => b.id !== id)
+        fs.writeFileSync(briefingsPath, JSON.stringify(updated, null, 2))
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Error deleting briefing:', error)
+        return NextResponse.json({ error: 'Failed to delete briefing' }, { status: 500 })
+    }
+}
