@@ -1,44 +1,70 @@
 'use client'
+
 import React, { useState } from 'react'
 
 export default function UploadForm() {
     const [file, setFile] = useState<File | null>(null)
-    const [status, setStatus] = useState('')
+    const [status, setStatus] = useState<string>('')
 
     async function submit(e: React.FormEvent) {
         e.preventDefault()
-        if (!file) return setStatus('⚠️ No file selected.')
+        if (!file) {
+            setStatus('⚠️ Please select a file before uploading.')
+            return
+        }
 
-        const fd = new FormData()
-        fd.append('file', file)
+        try {
+            const fd = new FormData()
+            fd.append('file', file)
 
-        setStatus('📤 Uploading and summarizing...')
-        const res = await fetch('/api/briefing', { method: 'POST', body: fd })
+            setStatus('📤 Uploading and summarizing...')
 
-        if (res.ok) {
+            // ✅ Make sure this path matches your API route (src/app/api/briefing/route.ts)
+            const res = await fetch('/api/briefing', {
+                method: 'POST',
+                body: fd,
+            })
+
+            if (!res.ok) {
+                const errorText = await res.text()
+                console.error('Upload failed:', errorText)
+                setStatus('❌ Upload failed. Please try again.')
+                return
+            }
+
             const data = await res.json()
-            setStatus(`✅ Summary ready: ${data.filename}`)
+            setStatus(`✅ Successfully summarized: ${data.filename}`)
             setFile(null)
-        } else {
-            setStatus('❌ Upload failed. Try again.')
+        } catch (error) {
+            console.error('Error uploading file:', error)
+            setStatus('❌ An unexpected error occurred.')
         }
     }
 
     return (
-        <form onSubmit={submit} className="flex flex-col gap-3">
+        <form
+            onSubmit={submit}
+            className="flex flex-col gap-4 items-center sm:items-start w-full"
+        >
             <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="p-2 border border-var-border rounded bg-var-card"
+                className="w-full sm:w-auto border border-zinc-700 bg-zinc-900/50 text-zinc-100 px-4 py-2 rounded-md cursor-pointer hover:border-zinc-500 focus:outline-none"
             />
+
             <button
                 type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 transition-all"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 shadow-md"
             >
-                Upload & Generate
+                Upload & Summarize
             </button>
-            {status && <div className="text-sm mt-1">{status}</div>}
+
+            {status && (
+                <div className="text-sm text-center sm:text-left text-zinc-400 mt-2">
+                    {status}
+                </div>
+            )}
         </form>
     )
 }
