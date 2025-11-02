@@ -6,6 +6,23 @@ import mammoth from 'mammoth'
 
 export const dynamic = 'force-dynamic'
 
+// Lightweight type describing the uploaded file object we expect from FormData
+type UploadedFileLike = {
+    name: string
+    arrayBuffer: () => Promise<ArrayBuffer>
+}
+
+// 🧩 Utility: Clean and split text into sentences
+// Type for pdf-parse callable signature
+type PdfParseFn = (buffer: Buffer) => Promise<{ text?: string }>
+
+type Briefing = {
+    id: number
+    filename: string
+    summary: string
+    date: string
+}
+
 // 🧩 Utility: Clean and split text into sentences
 function getSentences(text: string): string[] {
     return text
@@ -70,7 +87,7 @@ function highlightNames(text: string): string {
 }
 
 // 🧩 Utility: Convert uploaded file to plain text using pdf-parse
-async function extractTextFromFile(file: any): Promise<string> {
+async function extractTextFromFile(file: UploadedFileLike): Promise<string> {
     if (!file) throw new Error('No file provided')
     if (!file.name) throw new Error('Uploaded file is missing a name')
 
@@ -79,7 +96,9 @@ async function extractTextFromFile(file: any): Promise<string> {
     const ext = path.extname(String(file.name)).toLowerCase()
 
     if (ext === '.pdf') {
-        const data = await (pdf as any)(buffer)
+        // pdf-parse may export the function as the module itself or as default
+        const pdfParseFn: PdfParseFn = ((pdf as unknown) as { default?: PdfParseFn }).default ?? ((pdf as unknown) as PdfParseFn)
+        const data = await pdfParseFn(buffer)
         return data.text || ''
     }
     if (ext === '.doc' || ext === '.docx') {
@@ -93,7 +112,7 @@ async function extractTextFromFile(file: any): Promise<string> {
 export async function POST(req: Request) {
     try {
         const data = await req.formData()
-        const file = data.get('file') as any
+        const file = data.get('file') as UploadedFileLike | null
         if (!file) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
         }
@@ -121,11 +140,11 @@ ${actions.length > 0
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir)
 
         const briefingsPath = path.join(dataDir, 'briefings.json')
-        let existing: any[] = []
+        let existing: Briefing[] = []
         if (fs.existsSync(briefingsPath)) {
             try {
-                existing = JSON.parse(fs.readFileSync(briefingsPath, 'utf-8'))
-                if (!Array.isArray(existing)) existing = []
+                const parsed = JSON.parse(fs.readFileSync(briefingsPath, 'utf-8'))
+                if (Array.isArray(parsed)) existing = parsed as Briefing[]
             } catch (err) {
                 console.error('Failed to parse existing briefings.json, resetting to []', err)
                 existing = []
@@ -188,7 +207,7 @@ export async function DELETE(req: Request) {
         }
 
         const data = JSON.parse(fs.readFileSync(briefingsPath, 'utf-8'))
-        const updated = data.filter((b: any) => b.id !== id)
+        const updated = (Array.isArray(data) ? (data as Briefing[]) : []).filter((b: Briefing) => b.id !== id)
         fs.writeFileSync(briefingsPath, JSON.stringify(updated, null, 2))
 
         return NextResponse.json({ success: true })
