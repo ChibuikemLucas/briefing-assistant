@@ -30,7 +30,7 @@ Built with Tailwind CSS for smooth performance across mobile, tablet, and deskto
 
 1. Clone this repository
 ```bash
-git clone https://github.com/<ChibuikemLucas>/briefing-assistant.git
+git clone https://github.com/ChibuikemLucas/briefing-assistant.git
 cd briefing-assistant
 ```
 2. Install dependencies
