@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 🛰️ Briefing Assistant
 
-## Getting Started
+Briefing Assistant is a powerful Next.js web app that helps users upload, summarize, and manage operational or meeting briefings — built completely without external AI services.
 
-First, run the development server:
+All summaries are generated using custom text-parsing and logic-based algorithms designed by me, proving that intelligent automation doesn’t always need an AI API.
 
+It also includes a 3D Summary Visualization for a futuristic way to view insights and connections.
+
+
+## 🚀 Features
+
+### Logic-Based Summarization (No AI)
+Summaries are generated through a structured keyword analysis, text segmentation, and rule-based logic — no OpenAI or API calls involved.
+
+### Document Upload System
+Upload .docx files directly, with instant summarization and feedback.
+
+### Briefing Management Dashboard
+View, delete, and manage all uploaded briefings in one place.
+
+### PDF Upload (In Progress)
+Support for .pdf uploads is being integrated.
+
+### Fully Responsive UI
+Built with Tailwind CSS for smooth performance across mobile, tablet, and desktop screens.
+
+
+
+## ⚙️ Installation & Setup
+
+1. Clone this repository
+```bash
+git clone https://github.com/<ChibuikemLucas>/briefing-assistant.git
+cd briefing-assistant
+```
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
+3. Run the development server
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
