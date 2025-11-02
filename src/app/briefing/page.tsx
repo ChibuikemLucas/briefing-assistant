@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
 interface Briefing {
@@ -15,7 +14,6 @@ interface Briefing {
 export default function BriefingPage() {
     const [briefings, setBriefings] = useState<Briefing[]>([])
     const [loading, setLoading] = useState(true)
-    const router = useRouter()
 
     async function fetchBriefings() {
         try {
@@ -77,7 +75,7 @@ export default function BriefingPage() {
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-zinc-950 to-zinc-900 text-zinc-100 flex flex-col">
+        <main className="min-h-screen bg-linear-to-b from-zinc-950 to-zinc-900 text-zinc-100 flex flex-col">
             {/* Header */}
             <header className="flex items-center justify-between px-8 py-6 border-b border-zinc-800">
                 <h1 className="text-3xl font-extrabold tracking-tight">
